@@ -8,12 +8,12 @@ import {
   NewPendingOwnership,
   Transfer
 } from "../generated/Contract/Contract"
-import { ExampleEntity } from "../generated/schema"
+import { TransferEvent } from "../generated/schema"
 
 export function handleApproval(event: Approval): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+  /*let entity = ExampleEntity.load(event.transaction.from.toHex())
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
@@ -32,7 +32,7 @@ export function handleApproval(event: Approval): void {
   entity.spender = event.params.spender
 
   // Entities can be written to the store with `.save()`
-  entity.save()
+  entity.save()*/
 
   // Note: If a handler doesn't require existing field values, it is faster
   // _not_ to load the entity from the store. Instead, create it fresh with
@@ -74,4 +74,19 @@ export function handleNewOwnership(event: NewOwnership): void {}
 
 export function handleNewPendingOwnership(event: NewPendingOwnership): void {}
 
-export function handleTransfer(event: Transfer): void {}
+export function handleTransfer(event: Transfer): void {
+  let transferEvent = new TransferEvent(event.transaction.hash.toHex())
+
+  let amount = (event.params.value.toBigDecimal())
+  transferEvent.amount = amount
+  
+  transferEvent.sender = event.params.from
+  transferEvent.destination = event.params.to
+  
+  transferEvent.block = event.block.number
+  transferEvent.timestamp = event.block.timestamp
+  transferEvent.transaction = event.transaction.hash
+  
+  transferEvent.save()
+
+}
